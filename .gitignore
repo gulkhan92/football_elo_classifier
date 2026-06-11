@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.Python
+build/
+dist/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDEs and editors
+.idea/                  # PyCharm
+.vscode/                # VS Code
+.DS_Store               # macOS
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Data files
+# It's generally good practice to keep raw data out of version control
+# unless it's small, static, and essential for reproducibility.
+# For this project, we'll ignore the data folder.
+data/
+
+# Model files
+# Trained models can be large and are often regenerated.
+models/
+
+# Report files
+# Generated plots and reports
+reports/
+
+# Logs
+*.log
