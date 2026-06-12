@@ -105,6 +105,3 @@ The script will print progress and results to the console, and save generated mo
 ## Acknowledgements
 This project is inspired by common approaches in sports analytics and machine learning for predictive modeling.
 ```
-<!--
-[PROMPT_SUGGESTION]Can you help me find a more comprehensive Elo rating dataset or suggest a strategy to handle missing Elo ratings to retain more matches?[/PROMPT_SUGGESTION]
-[PROMPT_SUGGESTION]How can I add unit tests for the feature_engineering.py module, specifically for the calculate_rolling_features function?[/PROMPT_SUGGESTION]
