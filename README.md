@@ -40,16 +40,15 @@ football_elo_classifier/
 │   ├── results.csv             # Raw match results
 │   ├── elo_ratings.csv         # Historical Elo ratings
 │   └── goalscorers.csv         # Goalscorer data (used for World Cup/friendly flags)
-├── src/
-│   ├── config.py               # Centralized configuration (paths, dates, hyperparameters)
-│   ├── data_ingestion.py       # Handles loading and initial data checks
-│   ├── data_cleaning.py        # Functions for standardizing team names
-│   ├── feature_engineering.py  # Logic for creating all features, including temporal joins
-│   ├── data_splitter.py        # Manages chronological train/validation/test splits
-│   ├── model_trainer.py        # Encapsulates model training, tuning, and the two-stage predictor
-│   ├── model_evaluator.py      # Functions for evaluating models and generating plots
-│   ├── feature_analysis.py     # For feature importance extraction and visualization
-│   └── main.py                 # Orchestrates the entire ML pipeline
+├── config.py               # Centralized configuration (paths, dates, hyperparameters)
+├── data_ingestion.py       # Handles loading and initial data checks
+├── data_cleaning.py        # Functions for standardizing team names
+├── feature_engineering.py  # Logic for creating all features, including temporal joins
+├── data_splitter.py        # Manages chronological train/validation/test splits
+├── model_trainer.py        # Encapsulates model training, tuning, and the two-stage predictor
+├── model_evaluator.py      # Functions for evaluating models and generating plots
+├── feature_analysis.py     # For feature importance extraction and visualization
+├── main.py                 # Orchestrates the entire ML pipeline
 ├── models/                     # Directory to store trained machine learning models
 ├── reports/                    # Directory for generated plots, metrics, and reports
 ├── .gitignore                  # Specifies files/directories to ignore in Git
@@ -86,7 +85,7 @@ To get this project up and running on your local machine:
 To run the entire machine learning pipeline, execute the `main.py` script from the project root directory:
 
 ```bash
-python -m src.main
+python3 main.py
 ```
 
 The script will print progress and results to the console, and save generated models, plots, and detailed metrics into the `models/` and `reports/` directories, respectively.
