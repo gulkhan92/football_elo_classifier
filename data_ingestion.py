@@ -1,4 +1,4 @@
-# src/data_ingestion.py
+# data_ingestion.py
 import pandas as pd
 import os
 from config import DATA_DIR, RESULTS_FILE, ELO_RATINGS_FILE, WORLD_CUP_FILE, MIN_DATE, MAX_DATE, DATE_COL

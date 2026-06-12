@@ -1,4 +1,4 @@
-# src/data_cleaning.py
+# data_cleaning.py
 import pandas as pd
 import re
 from unidecode import unidecode
@@ -38,8 +38,8 @@ def clean_all_dataframes(df_results: pd.DataFrame, df_elo: pd.DataFrame, df_worl
     # Define columns to clean for each DataFrame
     results_cols = [HOME_TEAM_COL, AWAY_TEAM_COL]
     elo_cols = [TEAM_COL]
-    # Assuming world_cup_df also has home_team and away_team
-    world_cup_cols = [HOME_TEAM_COL, AWAY_TEAM_COL]
+    # Standardizing home, away, and the scorer team in goalscorers.csv
+    world_cup_cols = [HOME_TEAM_COL, AWAY_TEAM_COL, SCORER_TEAM_COL]
 
     df_results_cleaned = apply_team_name_cleaning(df_results, results_cols)
     df_elo_cleaned = apply_team_name_cleaning(df_elo, elo_cols)
@@ -95,7 +95,7 @@ def validate_team_names(df_results: pd.DataFrame, df_elo: pd.DataFrame, sample_s
 
 if __name__ == '__main__':
     # Example usage (assuming dataframes are loaded from Step 1)
-    from src.data_ingestion import load_dataframes, verify_data_integrity
+    from data_ingestion import load_dataframes, verify_data_integrity
     try:
         results_df, elo_df, world_cup_df = load_dataframes()
         results_df, elo_df = verify_data_integrity(results_df, elo_df)
@@ -106,4 +106,3 @@ if __name__ == '__main__':
         validate_team_names(results_df_cleaned, elo_df_cleaned, sample_size=50)
     except Exception as e:
         print(f"Data cleaning failed: {e}")
-

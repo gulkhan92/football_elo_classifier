@@ -1,12 +1,13 @@
-# src/feature_analysis.py
+# feature_analysis.py
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import joblib
+from config import REPORTS_DIR
 
-def plot_feature_importance(model, feature_names: list, model_name: str, output_dir: str = 'reports/'):
+def plot_feature_importance(model, feature_names: list, model_name: str, output_dir: str = REPORTS_DIR):
     """
     Extracts and plots feature importance for the given model.
     Handles both LightGBM (split importance) and Logistic Regression (coefficients).
@@ -49,7 +50,7 @@ def plot_feature_importance(model, feature_names: list, model_name: str, output_
 
     return importance_df
 
-def plot_feature_family_importance(importance_df: pd.DataFrame, output_dir: str = 'reports/'):
+def plot_feature_family_importance(importance_df: pd.DataFrame, output_dir: str = REPORTS_DIR):
     """
     Groups features into families and plots their relative importance.
     Assumes feature names follow a pattern that allows grouping.
@@ -139,4 +140,3 @@ if __name__ == '__main__':
 
     except Exception as e:
         print(f"Feature analysis failed: {e}")
-

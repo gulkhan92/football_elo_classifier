@@ -6,8 +6,9 @@ from sklearn.calibration import calibration_curve, CalibrationDisplay
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+from config import REPORTS_DIR
 
-def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series, model_name: str, output_dir: str = 'reports/') -> dict:
+def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series, model_name: str, output_dir: str = REPORTS_DIR) -> dict:
     """
     Evaluates a trained model on the test set and generates various metrics and plots.
     """
@@ -101,13 +102,65 @@ def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series, model_name: s
     }
     return metrics
 
+def evaluate_two_stage_model(
+    binary_draw_model,
+    multiclass_model,
+    X_test: pd.DataFrame,
+    y_test: pd.Series,
+    draw_threshold: float = 0.5,
+    output_dir: str = REPORTS_DIR
+) -> dict:
+    """
+    Evaluates the two-stage prediction model on the test set.
+    """
+    print(f"\n--- Evaluating Two-Stage Model on Test Set (Threshold: {draw_threshold}) ---")
+    os.makedirs(output_dir, exist_ok=True)
+
+    from model_trainer import TwoStagePredictor
+    two_stage_predictor = TwoStagePredictor(binary_draw_model, multiclass_model, draw_threshold)
+    y_pred_proba = two_stage_predictor.predict_proba(X_test)
+    y_pred = two_stage_predictor.predict(X_test)
+
+    # 1. Multiclass Log-Loss
+    test_log_loss = log_loss(y_test, y_pred_proba)
+    print(f"Test Multiclass Log-Loss (Two-Stage): {test_log_loss:.4f}")
+
+    # 2. Macro F1 Score
+    test_macro_f1 = f1_score(y_test, y_pred, average='macro')
+    print(f"Test Macro F1 Score (Two-Stage): {test_macro_f1:.4f}")
+
+    # 3. Draw Recall (assuming 'Draw' is class 1)
+    if 1 in y_test.unique() and 1 in multiclass_model.classes_:
+        draw_recall = f1_score(y_test, y_pred, labels=[1], average='macro')
+        print(f"Test Draw Recall (Two-Stage): {draw_recall:.4f}")
+    else:
+        draw_recall = 0.0
+        print("Draw class (1) not present in test set or model classes, cannot calculate draw recall.")
+
+    # Confusion Matrix
+    cm = confusion_matrix(y_test, y_pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=multiclass_model.classes_)
+    fig, ax = plt.subplots(figsize=(8, 6))
+    disp.plot(cmap=plt.cm.Blues, ax=ax)
+    ax.set_title(f'Confusion Matrix - Two-Stage Model (Threshold: {draw_threshold})')
+    plt.savefig(os.path.join(output_dir, f'two_stage_model_confusion_matrix_t{str(draw_threshold).replace(".", "")}.png'))
+    plt.close(fig)
+
+    metrics = {
+        'model_name': f'Two-Stage (Threshold: {draw_threshold})',
+        'test_log_loss': test_log_loss,
+        'test_macro_f1': test_macro_f1,
+        'test_draw_recall': draw_recall
+    }
+    return metrics
+
 if __name__ == '__main__':
     # Example usage (assuming X_test, y_test from Step 5 and best_model from Step 6)
-    from src.data_ingestion import load_dataframes, verify_data_integrity
-    from src.data_cleaning import clean_all_dataframes
-    from src.feature_engineering import generate_features
-    from src.data_splitter import chronological_split
-    from src.model_trainer import train_models
+    from data_ingestion import load_dataframes, verify_data_integrity
+    from data_cleaning import clean_all_dataframes
+    from feature_engineering import generate_features
+    from data_splitter import chronological_split
+    from model_trainer import train_models
     import joblib
 
     try:
@@ -146,4 +199,3 @@ if __name__ == '__main__':
 
     except Exception as e:
         print(f"Model evaluation failed: {e}")
-

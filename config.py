@@ -1,9 +1,15 @@
-# src/config.py
+# config.py
+import os
 
-DATA_DIR = 'data/'
+# Absolute path resolution for project directories
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+MODELS_DIR = os.path.join(BASE_DIR, 'models')
+REPORTS_DIR = os.path.join(BASE_DIR, 'reports')
+
 RESULTS_FILE = 'results.csv'
 ELO_RATINGS_FILE = 'elo_ratings.csv'
-WORLD_CUP_FILE = 'world_cup_matches.csv'
+WORLD_CUP_FILE = 'goalscorers.csv'
 
 # Date ranges for data verification and splitting
 MIN_DATE = '1872-01-01'
@@ -18,15 +24,14 @@ DATE_COL = 'date'
 HOME_TEAM_COL = 'home_team'
 AWAY_TEAM_COL = 'away_team'
 TEAM_COL = 'team' # For Elo ratings
-SCORER_TEAM_COL = 'scorer_team' # If applicable in results
-ELO_DATE_COL = 'rating_date' # For Elo ratings
-ELO_RATING_COL = 'elo_rating'
+SCORER_TEAM_COL = 'team' # The 'team' column in goalscorers.csv
+ELO_DATE_COL = 'date' # For Elo ratings matching your CSV
+ELO_RATING_COL = 'rating'
 
 # Model hyperparameters (initial suggestions, will be tuned)
 LOGREG_PARAMS = {
     'penalty': 'l2',
     'solver': 'saga', # Supports elasticnet and l2
-    'multi_class': 'multinomial',
     'max_iter': 1000,
     'random_state': 42
 }
@@ -34,7 +39,6 @@ LOGREG_PARAMS = {
 ELASTICNET_PARAMS = {
     'penalty': 'elasticnet',
     'solver': 'saga',
-    'multi_class': 'multinomial',
     'max_iter': 1000,
     'random_state': 42
 }
@@ -44,7 +48,8 @@ LGBM_PARAMS = {
     'num_class': 3, # Home Win, Draw, Away Win
     'metric': 'multi_logloss',
     'random_state': 42,
-    'n_jobs': -1
+    'n_jobs': -1,
+    'verbosity': -1
 }
 
 # Grid search parameters (example ranges)

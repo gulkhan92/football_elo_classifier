@@ -1,4 +1,4 @@
-# src/model_trainer.py
+# model_trainer.py
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression
@@ -10,7 +10,7 @@ import os
 
 from config import (
     LOGREG_PARAMS, ELASTICNET_PARAMS, LGBM_PARAMS,
-    LOGREG_GRID, ELASTICNET_GRID, LGBM_GRID
+    LOGREG_GRID, ELASTICNET_GRID, LGBM_GRID, MODELS_DIR
 )
 
 def train_and_tune_model(
@@ -76,7 +76,9 @@ def train_and_tune_model(
 
     # Retrain the best model on the entire training + validation set
     # This is the model that will be evaluated on the test set
-    final_model = model_class(**best_params)
+    final_params = initial_params.copy()
+    final_params.update(best_params)
+    final_model = model_class(**final_params)
     final_model.fit(X_train_val, y_train_val)
 
     # Evaluate on the validation set (for comparison with other models)
@@ -92,7 +94,7 @@ def train_models(
     X_val: pd.DataFrame,
     y_val: pd.Series,
     feature_names: list,
-    model_output_dir: str = 'models/'
+    model_output_dir: str = MODELS_DIR
 ) -> dict:
     """
     Orchestrates the training and tuning of all specified models.
@@ -151,10 +153,10 @@ def train_models(
 
 if __name__ == '__main__':
     # Example usage (assuming X_train, y_train, X_val, y_val, feature_cols from Step 5)
-    from src.data_ingestion import load_dataframes, verify_data_integrity
-    from src.data_cleaning import clean_all_dataframes
-    from src.feature_engineering import generate_features
-    from src.data_splitter import chronological_split
+    from data_ingestion import load_dataframes, verify_data_integrity
+    from data_cleaning import clean_all_dataframes
+    from feature_engineering import generate_features
+    from data_splitter import chronological_split
 
     try:
         results_df, elo_df, world_cup_df = load_dataframes()
@@ -181,7 +183,7 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"Model training failed: {e}")
 
-# src/model_trainer.py (continued)
+# model_trainer.py (continued)
 
 # ... (previous imports and functions) ...
 
@@ -234,7 +236,9 @@ def train_binary_draw_model(
     print(f"Best CV log-loss for Binary Draw Model: {best_binary_score:.4f}")
 
     # Retrain on combined train+val
-    final_binary_model = binary_model_class(**best_binary_params)
+    final_binary_params = binary_initial_params.copy()
+    final_binary_params.update(best_binary_params)
+    final_binary_model = binary_model_class(**final_binary_params)
     final_binary_model.fit(X_train_val_binary, y_train_val_binary)
 
     y_val_pred_proba_binary = final_binary_model.predict_proba(X_val)[:, 1] # Probability of draw
@@ -308,7 +312,7 @@ class TwoStagePredictor:
         probabilities = self.predict_proba(X)
         return np.argmax(probabilities, axis=1)
 
-# src/model_evaluator.py (extended to include two-stage model evaluation)
+# model_evaluator.py (extended to include two-stage model evaluation)
 # ... (previous imports and functions) ...
 
 def evaluate_two_stage_model(
@@ -377,11 +381,11 @@ def evaluate_two_stage_model(
 
 if __name__ == '__main__':
     # Example usage for two-stage model
-    from src.data_ingestion import load_dataframes, verify_data_integrity
-    from src.data_cleaning import clean_all_dataframes
-    from src.feature_engineering import generate_features
-    from src.data_splitter import chronological_split
-    from src.model_trainer import train_models # To get best_model if not already saved
+    from data_ingestion import load_dataframes, verify_data_integrity
+    from data_cleaning import clean_all_dataframes
+    from feature_engineering import generate_features
+    from data_splitter import chronological_split
+    from model_trainer import train_models # To get best_model if not already saved
 
     try:
         results_df, elo_df, world_cup_df = load_dataframes()
@@ -425,4 +429,3 @@ if __name__ == '__main__':
 
     except Exception as e:
         print(f"Two-stage model training/evaluation failed: {e}")
-

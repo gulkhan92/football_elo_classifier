@@ -1,24 +1,15 @@
-# src/main.py
+# main.py
 import pandas as pd
 import os
 import sys
 import joblib
 
-from config import DATE_COL, ELO_DATE_COL
-from data_ingestion import load_dataframes, verify_data_integrity
-from data_cleaning import clean_all_dataframes
-from feature_engineering import generate_features
-from data_splitter import chronological_split
-from model_trainer import train_models, train_binary_draw_model
-from model_evaluator import evaluate_model, evaluate_two_stage_model
-from feature_analysis import plot_feature_importance, plot_feature_family_importance
-# Add the project root to the sys.path to resolve 'src' module imports
-# This ensures the script can be run directly (e.g., 'python src/main.py')
+# This ensures the script can be run directly (e.g., 'python main.py')
 current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(current_dir, '..'))
-sys.path.insert(0, project_root)
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
 
-from config import DATE_COL, ELO_DATE_COL
+from config import DATE_COL, ELO_DATE_COL, DATA_DIR, MODELS_DIR, REPORTS_DIR
 from data_ingestion import load_dataframes, verify_data_integrity
 from data_cleaning import clean_all_dataframes
 from feature_engineering import generate_features
@@ -113,8 +104,7 @@ def run_pipeline():
 
 if __name__ == '__main__':
     # Create necessary directories if they don't exist
-    os.makedirs('data', exist_ok=True)
-    os.makedirs('models', exist_ok=True)
-    os.makedirs('reports', exist_ok=True)
+    os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(MODELS_DIR, exist_ok=True)
+    os.makedirs(REPORTS_DIR, exist_ok=True)
     run_pipeline()
-

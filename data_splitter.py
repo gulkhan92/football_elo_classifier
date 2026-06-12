@@ -1,6 +1,9 @@
-# src/data_splitter.py
+# data_splitter.py
 import pandas as pd
-from config import DATE_COL, TRAIN_END_DATE, VALIDATION_END_DATE, TEST_START_DATE
+from config import (
+    DATE_COL, TRAIN_END_DATE, VALIDATION_END_DATE, TEST_START_DATE,
+    HOME_TEAM_COL, AWAY_TEAM_COL
+)
 
 def chronological_split(df: pd.DataFrame, target_column: str) -> tuple:
     """
@@ -17,9 +20,12 @@ def chronological_split(df: pd.DataFrame, target_column: str) -> tuple:
     test_df = df_sorted[df_sorted[DATE_COL] >= pd.to_datetime(TEST_START_DATE)]
 
     # Separate features (X) and target (y)
-    feature_columns = [col for col in df_sorted.columns if col not in [target_column, DATE_COL, HOME_TEAM_COL, AWAY_TEAM_COL, 'home_score', 'away_score']]
-    # Add other columns to exclude from features if they are not features themselves
-    # e.g., 'tournament', 'city', 'country', 'neutral' if they are not encoded as features
+    # We must exclude all non-numeric metadata and original columns that were used for feature engineering
+    exclude_cols = [
+        target_column, DATE_COL, HOME_TEAM_COL, AWAY_TEAM_COL, 
+        'home_score', 'away_score', 'tournament', 'city', 'country', 'neutral', 'result'
+    ]
+    feature_columns = [col for col in df_sorted.columns if col not in exclude_cols]
 
     X_train = train_df[feature_columns]
     y_train = train_df[target_column]
@@ -45,9 +51,9 @@ def chronological_split(df: pd.DataFrame, target_column: str) -> tuple:
 
 if __name__ == '__main__':
     # Example usage (assuming final_features_df from Step 4)
-    from src.data_ingestion import load_dataframes, verify_data_integrity
-    from src.data_cleaning import clean_all_dataframes
-    from src.feature_engineering import generate_features
+    from data_ingestion import load_dataframes, verify_data_integrity
+    from data_cleaning import clean_all_dataframes
+    from feature_engineering import generate_features
 
     try:
         results_df, elo_df, world_cup_df = load_dataframes()
@@ -76,4 +82,3 @@ if __name__ == '__main__':
 
     except Exception as e:
         print(f"Data splitting failed: {e}")
-

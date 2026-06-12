@@ -1,4 +1,4 @@
-# src/feature_engineering.py
+# feature_engineering.py
 import pandas as pd
 import numpy as np
 from config import DATE_COL, HOME_TEAM_COL, AWAY_TEAM_COL, TEAM_COL, ELO_DATE_COL, ELO_RATING_COL
@@ -13,22 +13,27 @@ def perform_temporal_elo_join(df_results: pd.DataFrame, df_elo: pd.DataFrame) ->
     df_elo_copy = df_elo.copy()
 
     # Ensure date columns are datetime and sorted
-    df_results_copy[DATE_COL] = pd.to_datetime(df_results_copy[DATE_COL])
-    df_elo_copy[ELO_DATE_COL] = pd.to_datetime(df_elo_copy[ELO_DATE_COL])
-    df_elo_copy = df_elo_copy.sort_values(by=[TEAM_COL, ELO_DATE_COL]).reset_index(drop=True)
+    df_results_copy[DATE_COL] = pd.to_datetime(df_results_copy[DATE_COL], errors='coerce')
+    df_elo_copy[ELO_DATE_COL] = pd.to_datetime(df_elo_copy[ELO_DATE_COL], errors='coerce')
+
+    # merge_asof requires non-null merge keys (on and by) on both sides
+    df_results_copy = df_results_copy.dropna(subset=[DATE_COL, HOME_TEAM_COL, AWAY_TEAM_COL])
+    df_elo_copy = df_elo_copy.dropna(subset=[ELO_DATE_COL, TEAM_COL])
 
     # Prepare Elo ratings for merging: rename columns for clarity
+    # merge_asof requires the 'on' key (date) to be sorted globally.
     elo_home = df_elo_copy[[TEAM_COL, ELO_DATE_COL, ELO_RATING_COL]].rename(
         columns={TEAM_COL: HOME_TEAM_COL, ELO_DATE_COL: 'home_elo_date', ELO_RATING_COL: 'home_rating_pre_match'}
-    )
+    ).sort_values('home_elo_date').reset_index(drop=True)
+
     elo_away = df_elo_copy[[TEAM_COL, ELO_DATE_COL, ELO_RATING_COL]].rename(
         columns={TEAM_COL: AWAY_TEAM_COL, ELO_DATE_COL: 'away_elo_date', ELO_RATING_COL: 'away_rating_pre_match'}
-    )
+    ).sort_values('away_elo_date').reset_index(drop=True)
 
     # Use merge_asof for efficient temporal join
     # For home team
     df_results_copy = pd.merge_asof(
-        df_results_copy.sort_values(DATE_COL), # Must be sorted for merge_asof
+        df_results_copy.sort_values(DATE_COL),
         elo_home,
         left_on=DATE_COL,
         right_on='home_elo_date',
@@ -38,7 +43,7 @@ def perform_temporal_elo_join(df_results: pd.DataFrame, df_elo: pd.DataFrame) ->
 
     # For away team
     df_results_copy = pd.merge_asof(
-        df_results_copy.sort_values(DATE_COL), # Re-sort just in case, though it should still be sorted
+        df_results_copy.sort_values(DATE_COL),
         elo_away,
         left_on=DATE_COL,
         right_on='away_elo_date',
@@ -67,8 +72,8 @@ def perform_temporal_elo_join(df_results: pd.DataFrame, df_elo: pd.DataFrame) ->
 
 if __name__ == '__main__':
     # Example usage (assuming dataframes are loaded and cleaned)
-    from src.data_ingestion import load_dataframes, verify_data_integrity
-    from src.data_cleaning import clean_all_dataframes
+    from data_ingestion import load_dataframes, verify_data_integrity
+    from data_cleaning import clean_all_dataframes
 
     try:
         results_df, elo_df, world_cup_df = load_dataframes()
@@ -280,8 +285,8 @@ def generate_features(df_results: pd.DataFrame, df_elo: pd.DataFrame, df_world_c
 
 if __name__ == '__main__':
     # Example usage
-    from src.data_ingestion import load_dataframes, verify_data_integrity
-    from src.data_cleaning import clean_all_dataframes
+    from data_ingestion import load_dataframes, verify_data_integrity
+    from data_cleaning import clean_all_dataframes
 
     try:
         results_df, elo_df, world_cup_df = load_dataframes()
@@ -301,4 +306,3 @@ if __name__ == '__main__':
         print(final_features_df.columns.tolist())
     except Exception as e:
         print(f"Feature engineering failed: {e}")
-
